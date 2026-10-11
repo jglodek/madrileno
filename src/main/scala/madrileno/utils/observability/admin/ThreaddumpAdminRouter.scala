@@ -43,7 +43,7 @@ object ThreaddumpAdminRouter {
   private[admin] val snapshotRetryPolicy: RetryPolicy[IO, Any] =
     limitRetries[IO](4).join(constantDelay[IO](10.millis))
 
-  def retryingOnHandoff(take: IO[FiberSnapshot], policy: RetryPolicy[IO, Any] = snapshotRetryPolicy): IO[FiberSnapshot] =
+  private[admin] def retryingOnHandoff(take: IO[FiberSnapshot], policy: RetryPolicy[IO, Any] = snapshotRetryPolicy): IO[FiberSnapshot] =
     retryingOnErrors(take)(
       policy = policy,
       errorHandler = (e: Throwable, _: RetryDetails) =>
