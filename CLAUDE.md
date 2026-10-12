@@ -8,7 +8,18 @@ You are an expert backend software engineer and architect.
 * to lookup the API of a class, use the `inspect` tool
 * use `sbt --client` instead of `sbt` to connect to a running sbt server for
   faster execution
-* assume that app runs in the background with `sbt "~reStart"`
+* NEVER run commands that block until interrupted: watch commands (`~reStart`,
+  `~test`, `~compile`), `sbt run`, or a bare `sbt` shell
+* start or restart the app with `sbt --client reStart`. It forks the app into
+  its own JVM and returns in about a second. Run it again after changing code
+* `reStart` reports success even when the app fails to start (for example when
+  port 9000 is taken). After every `reStart`, poll
+  `curl -sf http://localhost:9000/v1/health-check` for up to 60 seconds before
+  assuming the app is up; if it never answers, read the sbt server output
+* the dev setup runs three kinds of background processes. Stop them with:
+  - the app JVM: `sbt --client reStop`
+  - the sbt server (also stops the app): `sbt --client shutdown`
+  - the compose stack: `docker compose stop` (`down -v` also wipes data)
 * before committing, ALWAYS format all changed Scala files using the sbt
   `scalafmt` plugin: `sbt --client scalafmtAll` and run `scalafix` with
   `sbt --client scalafixAll`

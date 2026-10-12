@@ -42,6 +42,28 @@ Watch is on Scala/SBT/HOCON files only — not `.env`, not docker-compose state.
 
 `reStart` (no `~`) is a one-shot run. Use it when you want to launch the app once for a manual smoke test without the rebuild-on-save behavior.
 
+## Driving the app from an agent or a script
+
+Watch loops, `sbt run`, and a bare `sbt` shell never return, so a coding assistant or a script that runs them hangs until something kills it. Use the one-shot tasks through `sbt --client` instead:
+
+```bash
+sbt --client reStart                              # fork the app and return; rerun after a code change
+until curl -sf http://localhost:9000/v1/health-check; do sleep 2; done   # wait until it answers
+sbt --client reStop                               # stop the app
+```
+
+`reStart` forks the app into its own JVM and returns in about a second. It reports success as soon as the JVM is launched, even if the app then fails to start (for example when the port is taken), so always wait for the health check, with a timeout in scripts.
+
+The dev setup leaves three kinds of background processes. Each has its own stop command:
+
+| Process | Started by | Stopped by |
+| --- | --- | --- |
+| App JVM | `sbt --client reStart` | `sbt --client reStop` |
+| sbt server | the first `sbt --client` call | `sbt --client shutdown` (also stops the app JVM) |
+| Postgres, Mailpit, OpenObserve, Silo | `docker compose up -d` | `docker compose stop` (`docker compose down -v` also wipes their data) |
+
+`CLAUDE.md` gives the assistant the same rules.
+
 ## Running tests
 
 ```
