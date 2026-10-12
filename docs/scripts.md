@@ -185,7 +185,7 @@ The checks:
 | 3 | docker-compose services running | Reports each of postgres / mailpit / silo / openobserve and its status. |
 | 4 | Postgres TCP socket open on `PG_PORT` | Reads `.env` for the port (falls back to `.env.sample` if `.env` is missing). |
 | 5–7 | Mailpit / Silo / OpenObserve HTTP health endpoints | `GET /api/v1/info`, `/minio/health/live`, `/healthz` respectively. |
-| 8 | App responding | `GET http://localhost:$PORT/v1/health-check`. Hints `sbt --client reStart` on failure. |
+| 8 | App responding | `GET http://localhost:$PORT/v1/health-check`. Hints `sbt --client reStart` on failure, or `~reStart` in an sbt shell to rebuild on save. |
 
 ### What it doesn't do
 
