@@ -98,7 +98,6 @@ object Doctor {
     }
 
   // Compose *service* names (top-level keys in docker-compose.yml), not container names.
-  // Service names stay stable across `init-project.scala`'s rename and across checkouts; container names don't.
   private val ExpectedServices: List[String] =
     List("postgres", "mailpit", "silo", "openobserve")
 
