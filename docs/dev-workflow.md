@@ -47,12 +47,16 @@ Watch is on Scala/SBT/HOCON files only — not `.env`, not docker-compose state.
 Watch loops, `sbt run`, and a bare `sbt` shell never return, so a coding assistant or a script that runs them hangs until something kills it. Use the one-shot tasks through `sbt --client` instead:
 
 ```bash
+curl -sf http://localhost:9000/v1/health-check    # answers? the app already runs, use it
 sbt --client reStart                              # fork the app and return; rerun after a code change
-until curl -sf http://localhost:9000/v1/health-check; do sleep 2; done   # wait until it answers
+for i in $(seq 30); do curl -sf http://localhost:9000/v1/health-check && break; sleep 2; done   # wait up to 60 s
+tail -n 50 logs/madrileno.log                     # never answered? the startup error is here
 sbt --client reStop                               # stop the app
 ```
 
-`reStart` forks the app into its own JVM and returns in about a second. It reports success as soon as the JVM is launched, even if the app then fails to start (for example when the port is taken), so always wait for the health check, with a timeout in scripts.
+`reStart` forks the app into its own JVM and returns in about a second. It reports success as soon as the JVM is launched, even if the app then fails to start (for example when the port is taken), so always wait for the health check. The detached sbt server discards the app's console output; `Main` logs any error that stops the app, so `logs/madrileno.log` is the place to look.
+
+A developer's `~reStart` loop and an assistant's `reStart` both bind port 9000, so only one of them can own the app. The assistant checks the health endpoint first and, if the app already answers, uses it instead of starting its own.
 
 The dev setup leaves three kinds of background processes. Each has its own stop command:
 
