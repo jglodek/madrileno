@@ -117,8 +117,6 @@ Compile / run / envVars ++= (Test / envFromFile).value
 
 Compile / mainClass := Some("madrileno.main.Main")
 
-// sbt 2 caches plain tasks; sbt-revolver 0.11.2 doesn't mark reStop and reStatus uncached, so after the
-// first call they replay the cached result and leave the app running. Redefine them uncached.
 reStop := Def.uncached(spray.revolver.Actions.stopAppWithStreams(streams.value, thisProjectRef.value))
 reStatus := Def.uncached(spray.revolver.Actions.showStatus(streams.value, thisProjectRef.value))
 

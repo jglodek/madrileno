@@ -113,7 +113,5 @@ object Main extends IOApp.Simple with LoggingSupport {
       .use { _ =>
         IO.never
       }
-      // Without this, a startup failure (e.g. port taken) only reaches stderr, which a detached
-      // sbt server (`sbt --client reStart`) discards; the File appender keeps it in logs/madrileno.log.
       .onError { case e => loggerWithoutTracing.error(e)("Application stopped with an error") }
 }
